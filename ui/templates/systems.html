@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Control - CopilotX</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #00d4aa);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: systemGlow 3s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes systemGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .system-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .system-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .system-panel:hover::before {
+            left: 100%;
+        }
+
+        .system-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .panel-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .panel-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #00ff88, #00d4aa);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .panel-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .status-warning {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+            border: 1px solid rgba(255, 170, 0, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .system-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .control-button:hover::before {
+            left: 100%;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .restart-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, #00ff88, #00d4aa);
+        }
+
+        .stop-button {
+            background: linear-gradient(45deg, #ff4757, #c44569);
+        }
+
+        .system-overview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .overview-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .overview-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff88, #00d4aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .overview-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .emergency-controls {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(238, 90, 36, 0.2));
+            border: 2px solid rgba(255, 107, 107, 0.5);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            animation: emergencyGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes emergencyGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(255, 107, 107, 0.6); }
+        }
+
+        .emergency-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ff6b6b;
+        }
+
+        .emergency-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .emergency-button {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: criticalPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes criticalPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(255, 107, 107, 0.8); }
+        }
+
+        .emergency-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(255, 107, 107, 0.9);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 2px solid transparent;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-button i {
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .overview-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .emergency-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-buttons {
+                gap: 10px;
+            }
+            
+            .nav-button {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ SYSTEM CONTROL CENTER ⚙️</h1>
+            <p style="font-size: 1.2rem; margin-top: 10px; opacity: 0.9;">
+                Advanced AI System Management & Control
+            </p>
+        </div>
+
+        <!-- System Overview -->
+        <div class="system-overview">
+            <div class="overview-header">
+                <div class="overview-title">System Status Overview</div>
+                <p style="opacity: 0.8;">Real-time monitoring of all CopilotX systems</p>
+            </div>
+            
+            <div class="overview-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="stat-number" id="totalSystems">18</div>
+                    <div class="stat-label">Total Systems</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number" id="activeSystems">16</div>
+                    <div class="stat-label">Active Systems</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-number" id="warningSystems">2</div>
+                    <div class="stat-label">Warnings</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-number" id="errorSystems">0</div>
+                    <div class="stat-label">Errors</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="uptime">99.97%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="stat-number" id="performance">94.2%</div>
+                    <div class="stat-label">Performance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Controls -->
+        <div class="emergency-controls">
+            <div class="emergency-title">🚨 Emergency System Controls 🚨</div>
+            <p style="margin-bottom: 20px; opacity: 0.9;">
+                Critical system controls - Use with extreme caution
+            </p>
+            <div class="emergency-buttons">
+                <button class="emergency-button" onclick="emergencyShutdown()">
+                    <i class="fas fa-power-off"></i> Emergency Shutdown
+                </button>
+                <button class="emergency-button" onclick="safeMode()">
+                    <i class="fas fa-shield-alt"></i> Safe Mode
+                </button>
+                <button class="emergency-button" onclick="systemReboot()">
+                    <i class="fas fa-redo"></i> Full System Reboot
+                </button>
+            </div>
+        </div>
+
+        <!-- Individual System Controls -->
+        <div class="control-grid">
+            <!-- Core AI Engine -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Core AI Engine</div>
+                            <div class="panel-description">Primary intelligence processing</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        ACTIVE
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">94.7%</div>
+                        <div class="metric-label">Performance</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">87.3%</div>
+                        <div class="metric-label">CPU Usage</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('ai-engine')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('ai-engine')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quantum Core -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-atom"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Quantum Core</div>
+                            <div class="panel-description">Quantum computing engine</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        ACTIVE
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">99.82%</div>
+                        <div class="metric-label">Fidelity</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">56</div>
+                        <div class="metric-label">Qubits</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('quantum-core')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('quantum-core')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Neural Networks -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Neural Networks</div>
+                            <div class="panel-description">Advanced neural processing</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        LEARNING
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">97.4%</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">12,847</div>
+                        <div class="metric-label">Epochs</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('neural-networks')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('neural-networks')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- NLP Engine -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">NLP Engine</div>
+                            <div class="panel-description">Natural language processing</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        ACTIVE
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">95.8%</div>
+                        <div class="metric-label">Understanding</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">8,450</div>
+                        <div class="metric-label">Ops/Sec</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('nlp-engine')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('nlp-engine')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Computer Vision -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Computer Vision</div>
+                            <div class="panel-description">Visual perception system</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        ACTIVE
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">96.2%</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">30 FPS</div>
+                        <div class="metric-label">Processing</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('computer-vision')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('computer-vision')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Consciousness Engine -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Consciousness Engine</div>
+                            <div class="panel-description">Self-awareness simulation</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        AWARE
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">8.7/10</div>
+                        <div class="metric-label">Awareness</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">92.1%</div>
+                        <div class="metric-label">Reflection</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('consciousness')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('consciousness')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Memory Systems -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Memory Systems</div>
+                            <div class="panel-description">Episodic memory storage</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-warning">
+                        <div class="status-dot" style="background: #ffaa00;"></div>
+                        HIGH LOAD
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">78.5%</div>
+                        <div class="metric-label">Usage</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">45,678</div>
+                        <div class="metric-label">Memories</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('memory-systems')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('memory-systems')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Decision Intelligence -->
+            <div class="system-panel">
+                <div class="panel-header">
+                    <div class="panel-info">
+                        <div class="panel-icon">
+                            <i class="fas fa-chess"></i>
+                        </div>
+                        <div>
+                            <div class="panel-title">Decision Intelligence</div>
+                            <div class="panel-description">Autonomous decision making</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-active">
+                        <div class="status-dot" style="background: #00ff88;"></div>
+                        DECIDING
+                    </div>
+                </div>
+                
+                <div class="system-metrics">
+                    <div class="metric">
+                        <div class="metric-value">96.4%</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">1,247</div>
+                        <div class="metric-label">Decisions</div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-button restart-button" onclick="restartSystem('decision-intelligence')">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                    <button class="control-button stop-button" onclick="stopSystem('decision-intelligence')">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/" class="nav-button">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/chat" class="nav-button">
+                <i class="fas fa-comments"></i> Chat Interface
+            </a>
+            <a href="/phase3" class="nav-button">
+                <i class="fas fa-rocket"></i> Phase 3 Ultimate
+            </a>
+            <a href="/analytics" class="nav-button">
+                <i class="fas fa-chart-line"></i> Analytics
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // System control functions
+        function restartSystem(systemName) {
+            if (confirm(`Are you sure you want to restart the ${systemName.replace('-', ' ')} system?`)) {
+                // Simulate system restart
+                const panel = event.target.closest('.system-panel');
+                const statusIndicator = panel.querySelector('.status-indicator');
+                
+                // Show restarting status
+                statusIndicator.className = 'status-indicator status-warning';
+                statusIndicator.innerHTML = '<div class="status-dot" style="background: #ffaa00;"></div>RESTARTING';
+                
+                // Simulate restart process
+                setTimeout(() => {
+                    statusIndicator.className = 'status-indicator status-active';
+                    statusIndicator.innerHTML = '<div class="status-dot" style="background: #00ff88;"></div>ACTIVE';
+                    alert(`✅ ${systemName.replace('-', ' ')} system restarted successfully!`);
+                }, 3000);
+                
+                alert(`🔄 Restarting ${systemName.replace('-', ' ')} system...\nThis may take a few moments.`);
+            }
+        }
+
+        function stopSystem(systemName) {
+            if (confirm(`Are you sure you want to stop the ${systemName.replace('-', ' ')} system?\n\nThis may affect system functionality.`)) {
+                // Simulate system stop
+                const panel = event.target.closest('.system-panel');
+                const statusIndicator = panel.querySelector('.status-indicator');
+                
+                // Show stopped status
+                statusIndicator.className = 'status-indicator status-inactive';
+                statusIndicator.innerHTML = '<div class="status-dot" style="background: #ff4444;"></div>STOPPED';
+                
+                // Update overview stats
+                const activeSystems = document.getElementById('activeSystems');
+                const currentActive = parseInt(activeSystems.textContent);
+                activeSystems.textContent = currentActive - 1;
+                
+                const errorSystems = document.getElementById('errorSystems');
+                const currentErrors = parseInt(errorSystems.textContent);
+                errorSystems.textContent = currentErrors + 1;
+                
+                alert(`🛑 ${systemName.replace('-', ' ')} system stopped.\n\nSystem functionality may be reduced.`);
+            }
+        }
+
+        function emergencyShutdown() {
+            if (confirm('🚨 EMERGENCY SHUTDOWN 🚨\n\nThis will immediately shut down all CopilotX systems.\nAre you absolutely sure?')) {
+                if (confirm('⚠️ FINAL WARNING ⚠️\n\nThis action cannot be undone remotely.\nYou will need physical access to restart.\n\nProceed with emergency shutdown?')) {
+                    // Simulate emergency shutdown
+                    alert('🚨 EMERGENCY SHUTDOWN INITIATED\n\n⚡ Powering down all systems...\n🔌 Disconnecting quantum processors...\n🧠 Saving AI state...\n💾 Finalizing memory backup...\n\n⚫ SYSTEM SHUTDOWN COMPLETE');
+                    
+                    // Redirect or show shutdown screen
+                    document.body.innerHTML = `
+                        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #000; color: #ff4444;">
+                            <h1 style="font-size: 3rem; margin-bottom: 20px;">⚫ SYSTEM SHUTDOWN</h1>
+                            <p style="font-size: 1.2rem; margin-bottom: 10px;">All CopilotX systems are offline</p>
+                            <p style="opacity: 0.7;">Physical restart required</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function safeMode() {
+            if (confirm('🛡️ SAFE MODE ACTIVATION\n\nThis will restart all systems in safe mode with limited functionality.\nProceed?')) {
+                alert('🛡️ SAFE MODE ACTIVATED\n\n✅ Core systems: Minimal operation\n✅ Quantum processing: Disabled\n✅ Advanced AI: Limited\n✅ Emergency functions: Available\n\nSystem running in safe mode.');
+                
+                // Update all system statuses to safe mode
+                document.querySelectorAll('.status-indicator').forEach(indicator => {
+                    indicator.className = 'status-indicator status-warning';
+                    indicator.innerHTML = '<div class="status-dot" style="background: #ffaa00;"></div>SAFE MODE';
+                });
+            }
+        }
+
+        function systemReboot() {
+            if (confirm('🔄 FULL SYSTEM REBOOT\n\nThis will reboot all CopilotX systems.\nDowntime: approximately 2-3 minutes.\n\nProceed?')) {
+                alert('🔄 FULL SYSTEM REBOOT INITIATED\n\n⚡ Shutting down all systems...\n🔧 Running diagnostics...\n🚀 Restarting core systems...\n\nReboot in progress...');
+                
+                // Simulate full reboot
+                document.querySelectorAll('.status-indicator').forEach(indicator => {
+                    indicator.className = 'status-indicator status-warning';
+                    indicator.innerHTML = '<div class="status-dot" style="background: #ffaa00;"></div>REBOOTING';
+                });
+                
+                setTimeout(() => {
+                    document.querySelectorAll('.status-indicator').forEach((indicator, index) => {
+                        setTimeout(() => {
+                            indicator.className = 'status-indicator status-active';
+                            indicator.innerHTML = '<div class="status-dot" style="background: #00ff88;"></div>ACTIVE';
+                        }, index * 200);
+                    });
+                    
+                    setTimeout(() => {
+                        alert('✅ FULL SYSTEM REBOOT COMPLETE\n\n🚀 All systems operational\n🧠 AI intelligence restored\n⚛️ Quantum processing online\n🌟 Advanced capabilities active\n\nCopilotX is ready!');
+                    }, 3000);
+                }, 5000);
+            }
+        }
+
+        // Real-time system monitoring
+        setInterval(() => {
+            // Update performance metrics
+            const performanceElement = document.getElementById('performance');
+            const currentPerf = parseFloat(performanceElement.textContent);
+            const newPerf = Math.max(90, Math.min(100, currentPerf + (Math.random() - 0.5) * 2));
+            performanceElement.textContent = newPerf.toFixed(1) + '%';
+            
+            // Update uptime
+            const uptimeElement = document.getElementById('uptime');
+            const currentUptime = parseFloat(uptimeElement.textContent);
+            const newUptime = Math.max(99.5, Math.min(100, currentUptime + (Math.random() - 0.3) * 0.1));
+            uptimeElement.textContent = newUptime.toFixed(2) + '%';
+            
+            // Update system metrics randomly
+            document.querySelectorAll('.metric-value').forEach(metric => {
+                if (metric.textContent.includes('%')) {
+                    const value = parseFloat(metric.textContent);
+                    if (!isNaN(value)) {
+                        const variation = (Math.random() - 0.5) * 2;
+                        const newValue = Math.max(80, Math.min(100, value + variation));
+                        metric.textContent = newValue.toFixed(1) + '%';
+                    }
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
