@@ -103,3 +103,10 @@ datasets/
 docs/_build/
 docs/build/
 site/
+
+# UI/Web build directories
+ui/modern_web/node_modules/
+ui/modern_web/dist/
+ui/modern_web/build/
+ui/modern_web/.next/
+*.tsbuildinfo
